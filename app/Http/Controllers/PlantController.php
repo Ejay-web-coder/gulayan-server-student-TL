@@ -12,10 +12,11 @@ class PlantController extends Controller
   /**
    * Display a listing of the resource.
    */
-  public function index()
+  public function index(Request $request)
   {
-    //TODO : implement load all the records
-    //TODO : implement pagination when loading all the records
+    $perPage = $request->get('per_page', 20);
+    $plants = PlantModel::paginate($perPage);
+    return response()->json($plants);
   }
 
   /**
