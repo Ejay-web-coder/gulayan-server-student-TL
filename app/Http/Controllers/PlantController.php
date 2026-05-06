@@ -37,9 +37,39 @@ class PlantController extends Controller
   /**
    * Update the specified resource in storage.
    */
-  public function update(Request $request, PlantModel $plantController)
+  public function update(Request $request, PlantModel $plant)
   {
-    //TODO : implement update record functionality
+    try {
+      // Validate the incoming request data
+      $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'variety' => 'required|string|max:255',
+        'notes' => 'nullable|string',
+        'date_planted' => 'required|date',
+        'seedling_count' => 'required|integer|min:0',
+        'batch_name' => 'required|string|max:255',
+        'starting_fund' => 'required|numeric|min:0',
+        'seedling_source' => 'required|string|max:255'
+      ]);
+
+      // Update the plant record with validated data
+      $plant->update($validated);
+
+      return response()->json([
+        'message' => 'Plant record updated successfully',
+        'data' => $plant
+      ], 200);
+    } catch (ValidationException $e) {
+      return response()->json([
+        'message' => 'Validation failed',
+        'errors' => $e->errors()
+      ], 422);
+    } catch (\Exception $e) {
+      return response()->json([
+        'message' => 'Error updating plant record',
+        'error' => $e->getMessage()
+      ], 500);
+    }
   }
 
   /**
@@ -47,6 +77,22 @@ class PlantController extends Controller
    */
   public function destroy(PlantModel $plant)
   {
-    //TODO : implement delete record functionality
+    try {
+      // Store plant info for response before deletion
+      $plantName = $plant->name;
+      
+      // Delete the plant record
+      $plant->delete();
+
+      return response()->json([
+        'message' => "Plant record '{$plantName}' deleted successfully",
+        'status' => 'success'
+      ], 200);
+    } catch (\Exception $e) {
+      return response()->json([
+        'message' => 'Error deleting plant record',
+        'error' => $e->getMessage()
+      ], 500);
+    }
   }
 }
